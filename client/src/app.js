@@ -2,36 +2,28 @@ import SocketIO from 'socket.io-client';
 import SocketIOFileClient from 'socket.io-file-client';
 
 var socket = SocketIO('http://localhost:3000');
+var uploader = new SocketIOFileClient(socket);
+var form = document.getElementById('form');
 
-socket.on('error', (err) => {
-	console.log(err);
+uploader.on('start', (fileInfo) => {
+	console.log('Start uploading', fileInfo);
+});
+uploader.on('stream', (fileInfo) => {
+	console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
+});
+uploader.on('complete', (fileInfo) => {
+	console.log('Upload Complete', fileInfo);
+});
+uploader.on('error', (err) => {
+	console.log('Error!', err);
+});
+uploader.on('abort', (fileInfo) => {
+	console.log('Aborted: ', fileInfo);
 });
 
-// set event handlers
-socket.on('connect', () => {
-	console.log('connection established!');
-});
-
-// unset event handlers
-socket.on('disconnect', () => {
-	console.log('disconnect connection');
-});
-
-var socketIOFile = new SocketIOFileClient(socket);
-
-socketIOFile.on('start', function() {
-	console.log('File uploading staring...');
-});
-
-socketIOFile.on('stream', function(data) {
-	console.log('SocketIOFileClient: Client streaming... ' + data.uploaded + ' / ' + data.size);
-});
-
-socketIOFile.on('complete', function() {
-	console.log('File Uploaded Successfully!');
-});
-
-document.getElementById('UploadButton').addEventListener('click', function() {
-	var file = document.getElementById('FileBox').files[0];
-	socketIOFile.upload(file);
-});
+form.onsubmit = function(ev) {
+	ev.preventDefault();
+	
+	var fileEl = document.getElementById('file');
+	var uploadIds = uploader.upload(fileEl);
+};
