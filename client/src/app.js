@@ -5,6 +5,15 @@ var socket = SocketIO('http://localhost:3000');
 var uploader = new SocketIOFileClient(socket);
 var form = document.getElementById('form');
 
+uploader.on('ready', function() {
+	console.log('SocketIOFile ready to go!');
+});
+uploader.on('loadstart', function() {
+	console.log('Loading file to browser before sending...');
+});
+uploader.on('progress', function(progress) {
+	console.log('Loaded ' + progress.loaded + ' / ' + progress.total);
+});
 uploader.on('start', (fileInfo) => {
 	console.log('Start uploading', fileInfo);
 });
